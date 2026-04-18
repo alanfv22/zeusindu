@@ -494,10 +494,10 @@ function WhyZeusSection() {
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, margin: '-100px' })
   const features = [
-    { icon: Zap, title: 'Entrega rapida', description: 'Turnos agiles para que nunca llegues tarde a tu cliente.' },
-    { icon: Package, title: 'Sin minimos', description: 'Desde una unidad. Proba, ajusta, escala cuando quieras.' },
-    { icon: MessageCircle, title: 'Atencion directa', description: 'Hablas con quien hace el trabajo. Sin intermediarios.' },
-    { icon: Star, title: 'Calidad garantizada', description: 'Revisamos cada prenda antes de entregartela.' },
+    { icon: Zap, title: 'Entrega rápida', description: 'Turnos ágiles para que nunca llegues tarde a tu cliente.' },
+    { icon: Package, title: 'Sin mínimos', description: 'Desde una unidad. Probá, ajustá, escalá cuando quieras.' },
+    { icon: MessageCircle, title: 'Atención directa', description: 'Hablás con quien hace el trabajo. Sin intermediarios.' },
+    { icon: Star, title: 'Envíos a todo el país', description: 'Enviamos de forma segura por Andreani y Correo Argentino.' },
   ]
   const stats = [
     { value: 500, suffix: '+', label: 'pedidos entregados' },
@@ -695,7 +695,7 @@ function Footer() {
         </div>
         <div className="border-t border-zinc-900 pt-6 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-zinc-600">
           <p>2025 Zeus Indu. Todos los derechos reservados.</p>
-          <p>Hecho con en San Justo</p>
+          <p>Hecho en San Justo</p>
         </div>
       </div>
     </footer>

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState, useRef } from 'react'
 import { useAdminAuth } from '@/hooks/useAdminAuth'
@@ -223,10 +223,8 @@ function ProductModal({
 }) {
   const isEdit = product !== null
   const [form, setForm] = useState({
-    name: product?.name ?? '',
     category_id: product?.category_id ?? '',
     garment_type: product?.garment_type ?? '',
-    description: product?.description ?? '',
     active: product?.active ?? true,
   })
   const [imageFile, setImageFile] = useState<File | null>(null)
@@ -247,10 +245,6 @@ function ProductModal({
   }
 
   async function handleSave() {
-    if (!form.name.trim()) {
-      setError('El nombre es obligatorio')
-      return
-    }
     setSaving(true)
     setError('')
 
@@ -262,10 +256,8 @@ function ProductModal({
           method: 'PUT',
           headers: { 'Content-Type': 'application/json', ...AUTH_HEADER },
           body: JSON.stringify({
-            name: form.name,
             category_id: form.category_id || null,
             garment_type: form.garment_type || null,
-            description: form.description || null,
             active: form.active,
           }),
         })
@@ -278,10 +270,8 @@ function ProductModal({
           method: 'POST',
           headers: { 'Content-Type': 'application/json', ...AUTH_HEADER },
           body: JSON.stringify({
-            name: form.name,
             category_id: form.category_id || null,
             garment_type: form.garment_type || null,
-            description: form.description || null,
             active: form.active,
           }),
         })
@@ -334,17 +324,6 @@ function ProductModal({
 
         <div className="space-y-4">
           <div>
-            <label className="block text-zinc-400 text-sm mb-1">Nombre *</label>
-            <input
-              type="text"
-              value={form.name}
-              onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-              className="w-full bg-zinc-800 border border-zinc-700 focus:border-[#FF0009] focus:outline-none text-white rounded-lg px-4 py-3"
-              placeholder="Ej: Remeras full print para equipo"
-            />
-          </div>
-
-          <div>
             <label className="block text-zinc-400 text-sm mb-1">Categoría</label>
             <select
               value={form.category_id}
@@ -374,17 +353,6 @@ function ProductModal({
                 </option>
               ))}
             </select>
-          </div>
-
-          <div>
-            <label className="block text-zinc-400 text-sm mb-1">Descripción</label>
-            <textarea
-              value={form.description}
-              onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
-              rows={3}
-              className="w-full bg-zinc-800 border border-zinc-700 focus:border-[#FF0009] focus:outline-none text-white rounded-lg px-4 py-3 resize-none"
-              placeholder="Descripción opcional..."
-            />
           </div>
 
           <div className="flex items-center gap-3">

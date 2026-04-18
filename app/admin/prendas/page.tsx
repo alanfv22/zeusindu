@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState } from 'react'
 import { useAdminAuth } from '@/hooks/useAdminAuth'
@@ -183,7 +183,7 @@ export default function PrendasPage() {
       {/* Add form */}
       <div className="bg-zinc-900 rounded-xl p-6 mb-6">
         <h3 className="text-white font-display text-xl mb-4">NUEVA PRENDA</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-zinc-400 text-xs mb-1">Nombre *</label>
             <input
@@ -197,16 +197,7 @@ export default function PrendasPage() {
               placeholder="Ej: Remera"
             />
           </div>
-          <div>
-            <label className="block text-zinc-400 text-xs mb-1">Slug (auto)</label>
-            <input
-              type="text"
-              value={addSlug}
-              onChange={(e) => setAddSlug(e.target.value)}
-              className="w-full bg-zinc-800 border border-zinc-700 focus:border-[#FF0009] focus:outline-none text-white rounded-lg px-4 py-3"
-              placeholder="remera"
-            />
-          </div>
+
           <div>
             <label className="block text-zinc-400 text-xs mb-1">Orden</label>
             <input
@@ -257,7 +248,7 @@ export default function PrendasPage() {
                           type="text"
                           value={editValues.name ?? ''}
                           onChange={(e) =>
-                            setEditValues((v) => ({ ...v, name: e.target.value }))
+                            setEditValues((v) => ({ ...v, name: e.target.value, slug: generateSlug(e.target.value) }))
                           }
                           className="bg-zinc-800 border border-zinc-600 focus:border-[#FF0009] focus:outline-none text-white rounded px-3 py-1.5 text-sm w-full"
                         />
@@ -266,18 +257,9 @@ export default function PrendasPage() {
                       )}
                     </td>
                     <td className="px-6 py-4">
-                      {isEditing ? (
-                        <input
-                          type="text"
-                          value={editValues.slug ?? ''}
-                          onChange={(e) =>
-                            setEditValues((v) => ({ ...v, slug: e.target.value }))
-                          }
-                          className="bg-zinc-800 border border-zinc-600 focus:border-[#FF0009] focus:outline-none text-white rounded px-3 py-1.5 text-sm w-full"
-                        />
-                      ) : (
-                        <span className="text-zinc-400 text-sm font-mono">{g.slug}</span>
-                      )}
+                      <span className="text-zinc-400 text-sm font-mono">
+                        {isEditing ? (editValues.slug ?? '') : g.slug}
+                      </span>
                     </td>
                     <td className="px-6 py-4">
                       {isEditing ? (

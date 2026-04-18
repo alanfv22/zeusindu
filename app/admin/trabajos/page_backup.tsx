@@ -34,63 +34,27 @@ const AUTH_HEADER = { Authorization: 'Bearer zeus-admin-authenticated' }
 
 async function compressImage(file: File): Promise<Blob> {
   return new Promise((resolve) => {
-    // Skip compression for small files — canvas re-encoding inflates them
-    if (file.size < 300 * 1024) {
-      resolve(file)
-      return
-    }
-
     const img = new Image()
     const url = URL.createObjectURL(file)
-
     img.onload = () => {
       const MAX_WIDTH = 1200
-      const MAX_HEIGHT = 1200
-
-      let width = img.width
-      let height = img.height
-
-      // Only resize if actually larger than max dimensions
-      if (width > MAX_WIDTH || height > MAX_HEIGHT) {
-        const ratio = Math.min(MAX_WIDTH / width, MAX_HEIGHT / height)
-        width = Math.round(width * ratio)
-        height = Math.round(height * ratio)
-      }
-
+      const ratio = Math.min(1, MAX_WIDTH / img.width)
       const canvas = document.createElement('canvas')
-      canvas.width = width
-      canvas.height = height
+      canvas.width = Math.round(img.width * ratio)
+      canvas.height = Math.round(img.height * ratio)
       const ctx = canvas.getContext('2d')!
-      ctx.drawImage(img, 0, 0, width, height)
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
       URL.revokeObjectURL(url)
-
-      canvas.toBlob((webpBlob) => {
-        if (!webpBlob) {
-          resolve(file)
-          return
-        }
-        // If WebP is larger than original, keep original
-        if (webpBlob.size >= file.size) {
-          resolve(file)
-          return
-        }
-        resolve(webpBlob)
-      }, 'image/webp', 0.85)
+      canvas.toBlob((blob) => resolve(blob!), 'image/webp', 0.85)
     }
-
-    img.onerror = () => {
-      URL.revokeObjectURL(url)
-      resolve(file) // fallback: use original
-    }
-
     img.src = url
   })
 }
 
 function formatBytes(bytes: number): string {
-  if (bytes < 1024) return bytes + ' B'
-  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB'
-  return (bytes / (1024 * 1024)).toFixed(2) + ' MB'
+  if (bytes < 1024) return `${bytes}B`
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)}KB`
+  return `${(bytes / 1024 / 1024).toFixed(1)}MB`
 }
 
 function getPrimaryImageUrl(images: AdminProduct['product_images']): string | null {
@@ -173,8 +137,8 @@ function ImageUploader({
               className="w-[200px] h-[200px] object-cover rounded-lg"
             />
             {sizes && (
-              <p className={`text-xs ${sizes.compressed < sizes.original ? 'text-green-400' : 'text-yellow-400'}`}>
-                {formatBytes(sizes.original)} → {formatBytes(sizes.compressed)}{sizes.compressed < sizes.original ? ' ✓' : ' (sin cambios)'}
+              <p className="text-xs text-zinc-400">
+                {formatBytes(sizes.original)} → {formatBytes(sizes.compressed)}
               </p>
             )}
             {uploading && (
@@ -259,8 +223,10 @@ function ProductModal({
 }) {
   const isEdit = product !== null
   const [form, setForm] = useState({
+    name: product?.name ?? '',
     category_id: product?.category_id ?? '',
     garment_type: product?.garment_type ?? '',
+    description: product?.description ?? '',
     active: product?.active ?? true,
   })
   const [imageFile, setImageFile] = useState<File | null>(null)
@@ -270,41 +236,28 @@ function ProductModal({
   const [saving, setSaving] = useState(false)
   const [uploadingImage, setUploadingImage] = useState(false)
   const [error, setError] = useState('')
-  const [fieldErrors, setFieldErrors] = useState<{ category_id?: string; garment_type?: string; image?: string }>({})
 
   async function handleFileSelect(file: File) {
     const preview = URL.createObjectURL(file)
     setImagePreview(preview)
     setImageFile(file)
-    if (fieldErrors.image) setFieldErrors((fe) => ({ ...fe, image: undefined }))
     const compressed = await compressImage(file)
     setCompressedBlob(compressed)
     setImageSizes({ original: file.size, compressed: compressed.size })
   }
 
   async function handleSave() {
-    const errors: { category_id?: string; garment_type?: string; image?: string } = {}
-    if (!form.category_id) errors.category_id = 'Seleccioná una categoría'
-    if (!form.garment_type) errors.garment_type = 'Seleccioná un tipo de prenda'
-    if (!isEdit && !imageFile) errors.image = 'La imagen es obligatoria'
-    if (Object.keys(errors).length > 0) {
-      setFieldErrors(errors)
-      return
-    }
-
     setSaving(true)
     setError('')
 
     try {
       let productId = product?.id
-      const garmentName = garmentTypes.find((g) => g.slug === form.garment_type)?.name ?? form.garment_type
 
       if (isEdit) {
         const res = await fetch(`/api/admin/products/${productId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json', ...AUTH_HEADER },
           body: JSON.stringify({
-            name: garmentName || null,
             category_id: form.category_id || null,
             garment_type: form.garment_type || null,
             active: form.active,
@@ -319,7 +272,6 @@ function ProductModal({
           method: 'POST',
           headers: { 'Content-Type': 'application/json', ...AUTH_HEADER },
           body: JSON.stringify({
-            name: garmentName || null,
             category_id: form.category_id || null,
             garment_type: form.garment_type || null,
             active: form.active,
@@ -336,10 +288,8 @@ function ProductModal({
       if ((imageFile || compressedBlob) && productId) {
         setUploadingImage(true)
         const blob = compressedBlob ?? (await compressImage(imageFile!))
-        const isWebP = blob.type === 'image/webp'
-        const ext = isWebP ? 'webp' : (imageFile?.name.split('.').pop() ?? 'jpg')
         const fd = new FormData()
-        fd.append('file', blob, `image.${ext}`)
+        fd.append('file', blob, 'image.webp')
         fd.append('productId', productId)
         const imgRes = await fetch('/api/admin/images', {
           method: 'POST',
@@ -379,11 +329,8 @@ function ProductModal({
             <label className="block text-zinc-400 text-sm mb-1">Categoría</label>
             <select
               value={form.category_id}
-              onChange={(e) => {
-                setForm((f) => ({ ...f, category_id: e.target.value }))
-                if (fieldErrors.category_id) setFieldErrors((fe) => ({ ...fe, category_id: undefined }))
-              }}
-              className={`w-full bg-zinc-800 border focus:outline-none text-white rounded-lg px-4 py-3 ${fieldErrors.category_id ? 'border-[#FF0009]' : 'border-zinc-700 focus:border-[#FF0009]'}`}
+              onChange={(e) => setForm((f) => ({ ...f, category_id: e.target.value }))}
+              className="w-full bg-zinc-800 border border-zinc-700 focus:border-[#FF0009] focus:outline-none text-white rounded-lg px-4 py-3"
             >
               <option value="">Sin categoría</option>
               {categories.map((c) => (
@@ -392,18 +339,14 @@ function ProductModal({
                 </option>
               ))}
             </select>
-            {fieldErrors.category_id && <p className="text-[#FF0009] text-xs mt-1">{fieldErrors.category_id}</p>}
           </div>
 
           <div>
             <label className="block text-zinc-400 text-sm mb-1">Tipo de prenda</label>
             <select
               value={form.garment_type}
-              onChange={(e) => {
-                setForm((f) => ({ ...f, garment_type: e.target.value }))
-                if (fieldErrors.garment_type) setFieldErrors((fe) => ({ ...fe, garment_type: undefined }))
-              }}
-              className={`w-full bg-zinc-800 border focus:outline-none text-white rounded-lg px-4 py-3 ${fieldErrors.garment_type ? 'border-[#FF0009]' : 'border-zinc-700 focus:border-[#FF0009]'}`}
+              onChange={(e) => setForm((f) => ({ ...f, garment_type: e.target.value }))}
+              className="w-full bg-zinc-800 border border-zinc-700 focus:border-[#FF0009] focus:outline-none text-white rounded-lg px-4 py-3"
             >
               <option value="">Sin tipo</option>
               {garmentTypes.map((g) => (
@@ -412,7 +355,14 @@ function ProductModal({
                 </option>
               ))}
             </select>
-            {fieldErrors.garment_type && <p className="text-[#FF0009] text-xs mt-1">{fieldErrors.garment_type}</p>}
+          </div>
+
+          <div className="flex items-center gap-3">
+            <ToggleSwitch
+              checked={form.active}
+              onChange={(v) => setForm((f) => ({ ...f, active: v }))}
+            />
+            <span className="text-zinc-400 text-sm">Activo (visible en el sitio)</span>
           </div>
 
           <div>
@@ -423,7 +373,6 @@ function ProductModal({
               sizes={imageSizes}
               uploading={uploadingImage}
             />
-            {fieldErrors.image && <p className="text-[#FF0009] text-xs mt-1">{fieldErrors.image}</p>}
           </div>
         </div>
 
@@ -633,5 +582,4 @@ export default function TrabajosPage() {
     </div>
   )
 }
-
 

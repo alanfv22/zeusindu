@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-admin'
 
 const STORE_ID = '9972a532-5c63-422d-a320-7f1c93bbf695'
@@ -22,11 +22,16 @@ export async function POST(request: NextRequest) {
   }
 
   const timestamp = Date.now()
-  const path = `${STORE_ID}/${productId}/${timestamp}.webp`
+  // Determine extension and content-type from the actual blob sent
+  const contentType = file.type || 'image/webp'
+  const ext = contentType === 'image/webp' ? 'webp'
+    : contentType === 'image/png' ? 'png'
+    : 'jpg'
+  const path = `${STORE_ID}/${productId}/${timestamp}.${ext}`
 
   const { error: uploadError } = await supabaseAdmin.storage
     .from(BUCKET)
-    .upload(path, file, { contentType: 'image/webp', upsert: false })
+    .upload(path, file, { contentType, upsert: false })
 
   if (uploadError) {
     return NextResponse.json({ error: uploadError.message }, { status: 500 })
@@ -47,3 +52,4 @@ export async function POST(request: NextRequest) {
 
   return NextResponse.json({ url: urlData.publicUrl })
 }
+

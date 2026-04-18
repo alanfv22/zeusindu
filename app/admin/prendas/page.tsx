@@ -71,7 +71,6 @@ export default function PrendasPage() {
 
   const [addName, setAddName] = useState('')
   const [addSlug, setAddSlug] = useState('')
-  const [addOrder, setAddOrder] = useState(0)
   const [addError, setAddError] = useState('')
   const [adding, setAdding] = useState(false)
 
@@ -88,8 +87,6 @@ export default function PrendasPage() {
       const json = await res.json()
       const data: AdminGarmentType[] = json.data ?? []
       setGarmentTypes(data)
-      const max = data.reduce((m, g) => Math.max(m, g.sort_order), -1)
-      setAddOrder(max + 1)
     } catch (err) {
       console.error(err)
     } finally {
@@ -115,7 +112,6 @@ export default function PrendasPage() {
         body: JSON.stringify({
           name: addName,
           slug: addSlug || generateSlug(addName),
-          sort_order: addOrder,
         }),
       })
       const json = await res.json()
@@ -132,7 +128,7 @@ export default function PrendasPage() {
 
   function startEdit(g: AdminGarmentType) {
     setEditingId(g.id)
-    setEditValues({ name: g.name, slug: g.slug, sort_order: g.sort_order })
+    setEditValues({ name: g.name, slug: g.slug })
   }
 
   async function handleSaveEdit(id: string) {
@@ -183,7 +179,7 @@ export default function PrendasPage() {
       {/* Add form */}
       <div className="bg-zinc-900 rounded-xl p-6 mb-6">
         <h3 className="text-white font-display text-xl mb-4">NUEVA PRENDA</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4">
           <div>
             <label className="block text-zinc-400 text-xs mb-1">Nombre *</label>
             <input
@@ -195,16 +191,6 @@ export default function PrendasPage() {
               }}
               className="w-full bg-zinc-800 border border-zinc-700 focus:border-[#FF0009] focus:outline-none text-white rounded-lg px-4 py-3"
               placeholder="Ej: Remera"
-            />
-          </div>
-
-          <div>
-            <label className="block text-zinc-400 text-xs mb-1">Orden</label>
-            <input
-              type="number"
-              value={addOrder}
-              onChange={(e) => setAddOrder(Number(e.target.value))}
-              className="w-full bg-zinc-800 border border-zinc-700 focus:border-[#FF0009] focus:outline-none text-white rounded-lg px-4 py-3"
             />
           </div>
         </div>
@@ -231,7 +217,6 @@ export default function PrendasPage() {
               <tr className="border-b border-zinc-800">
                 <th className="text-left text-zinc-500 text-xs font-medium px-6 py-3">NOMBRE</th>
                 <th className="text-left text-zinc-500 text-xs font-medium px-6 py-3">SLUG</th>
-                <th className="text-left text-zinc-500 text-xs font-medium px-6 py-3">ORDEN</th>
                 <th className="text-right text-zinc-500 text-xs font-medium px-6 py-3">
                   ACCIONES
                 </th>
@@ -260,23 +245,6 @@ export default function PrendasPage() {
                       <span className="text-zinc-400 text-sm font-mono">
                         {isEditing ? (editValues.slug ?? '') : g.slug}
                       </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      {isEditing ? (
-                        <input
-                          type="number"
-                          value={editValues.sort_order ?? 0}
-                          onChange={(e) =>
-                            setEditValues((v) => ({
-                              ...v,
-                              sort_order: Number(e.target.value),
-                            }))
-                          }
-                          className="bg-zinc-800 border border-zinc-600 focus:border-[#FF0009] focus:outline-none text-white rounded px-3 py-1.5 text-sm w-20"
-                        />
-                      ) : (
-                        <span className="text-zinc-400 text-sm">{g.sort_order}</span>
-                      )}
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex justify-end gap-2">

@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import { Bebas_Neue, DM_Sans } from 'next/font/google'
+import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
 
 const bebasNeue = Bebas_Neue({
@@ -43,6 +44,7 @@ export default function RootLayout({
     <html lang="es" className={`${bebasNeue.variable} ${dmSans.variable} bg-black`}>
       <body className="font-sans antialiased bg-black text-white">
         {children}
+        <Analytics />
       </body>
     </html>
   )

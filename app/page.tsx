@@ -56,9 +56,8 @@ function Navbar() {
   return (
     <>
       <nav
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          scrolled ? 'bg-black/95 backdrop-blur-md' : 'bg-black/80 backdrop-blur-sm'
-        }`}
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'bg-black/95 backdrop-blur-md' : 'bg-black/80 backdrop-blur-sm'
+          }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 md:h-20">
@@ -369,11 +368,10 @@ function GallerySection() {
             <button
               key={t.value}
               onClick={() => handleTechniqueChange(t.value)}
-              className={`px-4 py-2 font-display text-sm tracking-widest transition-all duration-200 ${
-                activeTechnique === t.value
+              className={`px-4 py-2 font-display text-sm tracking-widest transition-all duration-200 ${activeTechnique === t.value
                   ? 'bg-zeus-red text-white'
                   : 'border border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:text-zinc-300'
-              }`}
+                }`}
             >
               {t.label}
             </button>
@@ -385,11 +383,10 @@ function GallerySection() {
             <button
               key={g.value}
               onClick={() => setActiveGarment(g.value)}
-              className={`px-3 py-1.5 font-display text-xs tracking-widest transition-all duration-200 ${
-                activeGarment === g.value
+              className={`px-3 py-1.5 font-display text-xs tracking-widest transition-all duration-200 ${activeGarment === g.value
                   ? 'bg-zinc-700 text-white'
                   : 'border border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:text-zinc-300'
-              }`}
+                }`}
             >
               {g.label}
             </button>
@@ -501,7 +498,7 @@ function WhyZeusSection() {
   ]
   const stats = [
     { value: 500, suffix: '+', label: 'pedidos entregados' },
-    { value: 3, suffix: '', label: 'anos en el rubro' },
+    { value: 5, suffix: '', label: 'años en el rubro' },
     { value: 100, suffix: '%', label: 'clientes satisfechos' },
   ]
   return (

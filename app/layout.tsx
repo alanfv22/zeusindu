@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import { Bebas_Neue, DM_Sans } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
+import Script from 'next/script' // <-- Importamos el componente de Next.js
 import './globals.css'
 
 const bebasNeue = Bebas_Neue({
@@ -42,6 +43,21 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es" className={`${bebasNeue.variable} ${dmSans.variable} bg-black`}>
+      <head>
+        {/* Google Ads Tag */}
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=AW-18085011232"
+          strategy="afterInteractive"
+        />
+        <Script id="google-ads-tag" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'AW-18085011232');
+          `}
+        </Script>
+      </head>
       <body className="font-sans antialiased bg-black text-white">
         {children}
         <Analytics />

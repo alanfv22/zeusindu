@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
@@ -578,12 +578,20 @@ function StatCounter({ stat, delay }: { stat: { value: number; suffix: string; l
 // ============================================
 function OrderSection({ store }: { store: Store | null }) {
   const [message, setMessage] = useState('')
+  
   const handleWhatsApp = () => {
+    // === RASTREO PIXEL META ===
+    if (typeof window !== 'undefined' && (window as any).fbq) {
+      (window as any).fbq('track', 'Contact');
+    }
+    // ==========================
+
     const whatsappUrl = `https://wa.me/${store?.whatsapp_number ?? '541127129548'}?text=${encodeURIComponent(
       (store?.whatsapp_message_template ?? '¡Hola! Me comunico desde la web.') + '\n\n' + (message || 'Hola! Quiero hacer un pedido.')
     )}`
     window.open(whatsappUrl, '_blank')
   }
+
   const checklistItems = [
     'Que prenda o producto queres? (ej: camisetas, gorras, buzos, bolsas, tazas)',
     'Tecnica: sublimado, estampado o bordado (o preguntanos cual conviene)',
@@ -671,7 +679,7 @@ function Footer() {
             <ul className="space-y-3 text-sm text-zinc-400">
               <li className="flex items-center gap-2">
                 <MapPin size={16} className="text-zeus-red" />
-                Monsenor Marcon 2126, San Justo, Bs As
+                Monsenor Marcon 2126, San San Justo, Bs As
               </li>
               <li className="flex items-center gap-2">
                 <Phone size={16} className="text-zeus-red" />
@@ -691,7 +699,7 @@ function Footer() {
           </div>
         </div>
         <div className="border-t border-zinc-900 pt-6 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-zinc-600">
-          <p>2025 Zeus Indu. Todos los derechos reservados.</p>
+          <p>2026 Zeus Indu. Todos los derechos reservados.</p>
           <p>Hecho en San Justo</p>
         </div>
       </div>
@@ -703,11 +711,20 @@ function Footer() {
 // FLOATING WHATSAPP BUTTON
 // ============================================
 function WhatsAppButton({ store }: { store: Store | null }) {
+  const trackFloatingClick = () => {
+    // === RASTREO PIXEL META ===
+    if (typeof window !== 'undefined' && (window as any).fbq) {
+      (window as any).fbq('track', 'Contact');
+    }
+    // ==========================
+  };
+
   return (
     <motion.a
       href={`https://wa.me/${store?.whatsapp_number ?? '541127129548'}`}
       target="_blank"
       rel="noopener noreferrer"
+      onClick={trackFloatingClick}
       initial={{ scale: 0 }}
       animate={{ scale: 1 }}
       transition={{ delay: 1.5, type: 'spring', stiffness: 200 }}
